@@ -23,12 +23,12 @@ window.DASHBOARD_CONFIG = {
   //  - expect: 잘못된 탭을 읽지 않도록, CSV 첫 부분에 있어야 하는 글자
   channels: [
     { key: "kikiki", name: "킼킼킼", color: "kikiki",
-      content: { sheet: "킼킼킼", gid: "", expect: ["킼킼킼"] },
-      ads:     { sheet: "킼킼킼_광고 / 협찬 문의 현황", gid: "", expect: ["킼", "킥"] } },
+      content: { sheet: "킼킼킼", gid: "1464159702", expect: ["킼킼킼"] },
+      ads:     { sheet: "킼킼킼_광고 / 협찬 문의 현황", gid: "1016899569", expect: ["킼", "킥"] } },
     { key: "gugu", name: "굽굽매거진", color: "gugu",
-      content: { sheet: "굽굽매거진", gid: "", expect: ["굽굽"] },
-      ads:     { sheet: "굽굽_광고 / 협찬 문의 현황", gid: "", expect: ["굽굽"] } },
+      content: { sheet: "굽굽매거진", gid: "1052192683", expect: ["굽굽"] },
+      ads:     { sheet: "굽굽_광고 / 협찬 문의 현황", gid: "1883486237", expect: ["굽굽"] } },
   ],
-  followers: { sheet: "팔로워 총괄표 2026", gid: "", expect: ["팔로워"] },
-  revenue:   { sheet: "월별 매출표 2026", gid: "", expect: ["INSTAGRAM", "매출"] },
+  followers: { sheet: "팔로워 총괄표 2026", gid: "2110976692", expect: ["팔로워"] },
+  revenue:   { sheet: "월별 매출표 2026", gid: "2044720759", expect: ["INSTAGRAM", "매출"] },
 };
