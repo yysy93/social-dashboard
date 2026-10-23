@@ -123,7 +123,7 @@ h3 { font-size: 15px; margin: 0; font-weight: 700; }
 .channels { display: grid; gap: 22px; grid-template-columns: 1fr; }
 @media (min-width: 1100px) {
   .channels { grid-template-columns: 1fr 1fr; }
-  .seg { display: none; }
+  #channel-tabs { display: none; }
 }
 @media (max-width: 1099px) {
   .channels[data-active="kikiki"] .channel[data-key="gugu"],
@@ -209,8 +209,13 @@ h3 { font-size: 15px; margin: 0; font-weight: 700; }
 body[data-view="overview"] .section[data-section="ads"],
 body[data-view="revenue"] .section:not([data-section="revenue"]),
 body[data-view="ads"]     .section:not([data-section="ads"]),
-body[data-view="kikiki"]  .section:not([data-section="channels"]),
-body[data-view="gugu"]    .section:not([data-section="channels"]) { display: none; }
+body[data-view="kikiki"]  .section:not([data-section="channels"]):not([data-section="subnav"]):not([data-section="uploads"]),
+body[data-view="gugu"]    .section:not([data-section="channels"]):not([data-section="subnav"]):not([data-section="uploads"]) { display: none; }
+/* 하위 메뉴(요약 / 전체 업로드 현황)는 채널 탭에서만, 업로드 현황은 해당 하위 메뉴에서만 */
+.section[data-section="subnav"], .section[data-section="uploads"] { display: none; }
+body[data-view="kikiki"] .section[data-section="subnav"], body[data-view="gugu"] .section[data-section="subnav"] { display: block; }
+body[data-sub="uploads"] .section[data-section="uploads"] { display: block; }
+body[data-sub="uploads"] .section[data-section="channels"] { display: none; }
 
 /* 채널 팔로워 칩 */
 .channel-title { flex-wrap: wrap; }
@@ -255,3 +260,23 @@ body[data-view="revenue"] #period, body[data-view="ads"] #period { display: none
 main.wrap { padding-top: 36px; padding-bottom: 32px; }
 @media (max-width: 480px) { main.wrap { padding-top: 28px; } }
 .tabs a[aria-current="page"]::after { height: 3px; border-radius: 3px 3px 0 0; }
+
+/* ===== 채널 하위 메뉴 · 전체 업로드 현황 ===== */
+.section[data-section="subnav"] { margin-bottom: 20px; }
+.subnav a { font-size: 14px; font-weight: 600; color: var(--text-2); padding: 7px 16px; border-radius: 9px; text-decoration: none; }
+.subnav a[aria-current="page"] { background: var(--card); color: var(--text); box-shadow: var(--shadow); }
+
+.up-month td, .up-month th, .up-tbl td, .up-tbl th { white-space: nowrap; }
+.up-month tfoot td, .up-month tr.total td { font-weight: 700; border-top: 1px solid var(--line); }
+.up-tbl th.sortable { cursor: pointer; user-select: none; }
+.up-tbl th.sortable:hover { color: var(--text); }
+.up-tbl th[aria-sort] { color: var(--text); }
+.up-tbl td.t-title { white-space: normal; min-width: 240px; max-width: 420px; }
+.up-tbl .fmt { font-size: 12px; padding: 2px 8px; border-radius: 6px; background: var(--neutral-soft); color: var(--text-2); }
+.up-tbl tr.new-day td { border-top: 1px solid var(--line); }
+.up-controls { display: flex; gap: 8px; flex-wrap: wrap; }
+.up-controls input { font: inherit; font-size: 14px; color: var(--text); background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; width: 220px; max-width: 100%; }
+.up-more { text-align: center; margin-top: 12px; }
+.up-note { margin: 10px 0 0; font-size: 12px; }
+.up-list-card, .section[data-section="uploads"] > .card { margin-top: 14px; }
+@media (max-width: 480px) { .up-controls, .up-controls input { width: 100%; } }
