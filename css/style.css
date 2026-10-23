@@ -188,3 +188,43 @@ h3 { font-size: 15px; margin: 0; font-weight: 700; }
 .ok-t { color: var(--good); font-weight: 600; } .bad-t { color: var(--warn); font-weight: 600; }
 
 .foot { color: var(--muted); font-size: 12px; padding-bottom: 32px; }
+
+/* ===== 보기 탭 (한눈에 보기 / 팔로워 / 매출 / 채널별) ===== */
+.tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; padding-bottom: 0; }
+.tabs::-webkit-scrollbar { display: none; }
+.tabs a {
+  flex: none; display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 14px; font-size: 14px; font-weight: 600; color: var(--text-2);
+  text-decoration: none; border-bottom: 2px solid transparent; white-space: nowrap;
+}
+.tabs a:hover { color: var(--text); }
+.tabs a[aria-current="page"] { color: var(--text); border-bottom-color: var(--text); }
+.tabs .dot { width: 8px; height: 8px; }
+
+/* 탭별로 보일 구역 */
+body[data-view="followers"] .section:not([data-section="followers"]),
+body[data-view="revenue"]   .section:not([data-section="revenue"]),
+body[data-view="kikiki"]    .section:not([data-section="channels"]),
+body[data-view="gugu"]      .section:not([data-section="channels"]) { display: none; }
+
+/* 채널 단독 보기: 선택한 채널만, 넓게 */
+body[data-view="kikiki"] .channel[data-key="gugu"],
+body[data-view="gugu"] .channel[data-key="kikiki"],
+body[data-view="kikiki"] #channel-tabs,
+body[data-view="gugu"] #channel-tabs,
+body[data-view="kikiki"] #h-channels,
+body[data-view="gugu"] #h-channels { display: none !important; }
+body[data-view="kikiki"] .channels,
+body[data-view="gugu"] .channels { grid-template-columns: 1fr; }
+@media (min-width: 900px) {
+  body[data-view="kikiki"] .channel,
+  body[data-view="gugu"] .channel { grid-template-columns: 1fr 1fr; align-items: start; }
+  body[data-view="kikiki"] .channel > .channel-title, body[data-view="gugu"] .channel > .channel-title,
+  body[data-view="kikiki"] .channel > .ch-kpis,       body[data-view="gugu"] .channel > .ch-kpis,
+  body[data-view="kikiki"] .channel > .ads-card,      body[data-view="gugu"] .channel > .ads-card { grid-column: 1 / -1; }
+  body[data-view="kikiki"] .channel .kpi-grid, body[data-view="gugu"] .channel .kpi-grid { grid-template-columns: repeat(4, 1fr); }
+  body[data-view="kikiki"] .ads, body[data-view="gugu"] .ads { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+  body[data-view="kikiki"] .channel .h-200, body[data-view="gugu"] .channel .h-200 { height: 260px; }
+}
+body[data-view="kikiki"] .channel-title h3, body[data-view="gugu"] .channel-title h3 { font-size: 20px; }
+.top-inner { padding-bottom: 6px; }
