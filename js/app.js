@@ -170,6 +170,7 @@
     renderFollowers();
     renderRevenue();
     renderChannels();
+    renderAdsOverview();
     renderVerify();
   }
 
@@ -320,6 +321,11 @@
       el.dataset.key = cfg.key;
       $(".dot", el).classList.add(cfg.color);
       $(".ch-name", el).textContent = cfg.name;
+      const fo = followerOf(cfg);
+      if (fo && fo.points.length) {
+        const a = fo.points[0], b = fo.points.at(-1), d = b.value - a.value;
+        $(".ch-follow", el).innerHTML = `팔로워 <b>${fmt(b.value)}</b>명 <span class="${d >= 0 ? "delta-up" : "delta-down"}">${d >= 0 ? "▲" : "▼"} ${signed(d)} (${pct((d / a.value) * 100)})</span>`;
+      }
       host.appendChild(el);
       renderAds(el, ch.ads);
       if (!ch.content) { $(".ch-kpis", el).innerHTML = `<p class="hint">콘텐츠 데이터를 불러오지 못했어요.</p>`; [".top-card"].forEach((s) => ($(s, el).hidden = true)); return; }
@@ -417,6 +423,32 @@
     </div>`).join("") : `<p class="ads-empty">등록된 문의가 없어요.</p>`;
   }
 
+  /* ⑤ 광고 현황 (두 채널 통합) */
+  let adsFilter = "all";
+  function renderAdsOverview() {
+    const all = CFG.channels.flatMap((cfg) => (M.channels[cfg.key].ads || []).map((a) => ({ ...a, ch: cfg })));
+    const conf = all.filter((a) => a.confirmed === "확정").length;
+    const k = (label, value, foot) => `<div class="card kpi"><div class="label">${label}</div><div class="value">${value}</div><div class="foot">${foot}</div></div>`;
+    $("#ads-kpis").innerHTML =
+      k("전체 문의", `${fmt(all.length)}건`, CFG.channels.map((c) => `${esc(c.name)} ${(M.channels[c.key].ads || []).length}건`).join(" · ")) +
+      k("진행 확정", `${fmt(conf)}건`, all.length ? `확정률 ${fmt1((conf / all.length) * 100)}%` : "") +
+      k("미확정", `${fmt(all.filter((a) => a.confirmed === "미확정").length)}건`, "단가 전달 · 협의 중 포함") +
+      k("검토 중", `${fmt(all.filter((a) => a.confirmed !== "확정" && a.confirmed !== "미확정").length)}건`, "확정 여부 미입력");
+    const f = $("#ads-filter");
+    f.innerHTML = [["all", "전체"], ...CFG.channels.map((c) => [c.key, c.name])]
+      .map(([v, l]) => `<button type="button" data-v="${v}" aria-selected="${adsFilter === v}">${esc(l)}</button>`).join("");
+    f.querySelectorAll("button").forEach((b) => (b.onclick = () => { adsFilter = b.dataset.v; renderAdsOverview(); }));
+    const list = adsFilter === "all" ? all : all.filter((a) => a.ch.key === adsFilter);
+    $("#ads-rows").innerHTML = list.length ? list.map((a) => `<tr>
+      <td><span class="ch-tag"><i class="dot ${a.ch.color}"></i>${esc(a.ch.name)}</span></td>
+      <td class="wrap-cell"><b>${esc(a.brand)}</b></td>
+      <td class="wrap-cell">${[a.category, a.product].filter(Boolean).map(esc).join(" · ") || "-"}</td>
+      <td>${esc(a.form) || "-"}</td><td>${esc(a.route) || "-"}</td><td>${esc(a.requested) || "-"}</td>
+      <td>${a.status ? `<span class="badge">${esc(a.status)}</span>` : "-"}</td>
+      <td><span class="badge ${a.confirmed === "확정" ? "good" : a.confirmed === "미확정" ? "" : "warn"}">${a.confirmed === "확정" ? "✓ " : a.confirmed === "미확정" ? "○ " : "… "}${esc(a.confirmed)}</span></td>
+    </tr>`).join("") : `<tr><td colspan="8" class="hint">등록된 문의가 없어요.</td></tr>`;
+  }
+
   /* 검증 */
   const LABEL = { views: "조회수", reach: "도달", likes: "좋아요", comments: "댓글", saves: "저장", shares: "공유" };
   function renderVerify() {
@@ -442,7 +474,7 @@
   $("#refresh").addEventListener("click", loadAll);
 
   /* ---------- 보기 탭 (주소 끝 #overview, #followers, #revenue, #kikiki, #gugu) ---------- */
-  const VIEWS = ["overview", "followers", "revenue", ...CFG.channels.map((c) => c.key)];
+  const VIEWS = ["overview", ...CFG.channels.map((c) => c.key), "revenue", "ads"];
   let dataReady = false;
   function applyView() {
     const h = location.hash.slice(1);
