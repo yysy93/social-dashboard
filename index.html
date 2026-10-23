@@ -22,12 +22,14 @@
       <button id="refresh" class="btn" type="button">↻ 새로고침</button>
     </div>
   </div>
-  <nav class="wrap tabs" id="view-tabs" aria-label="보기 선택">
-    <a href="#overview" data-view="overview">한눈에 보기</a>
-    <a href="#followers" data-view="followers">팔로워</a>
-    <a href="#revenue" data-view="revenue">매출</a>
-    <a href="#kikiki" data-view="kikiki"><i class="dot kikiki"></i>킼킼킼</a>
-    <a href="#gugu" data-view="gugu"><i class="dot gugu"></i>굽굽매거진</a>
+  <nav class="tabbar" aria-label="보기 선택">
+    <div class="wrap tabs" id="view-tabs">
+      <a href="#overview" data-view="overview">전체 보기</a>
+      <a href="#kikiki" data-view="kikiki">킼킼킼</a>
+      <a href="#gugu" data-view="gugu">굽굽매거진</a>
+      <a href="#revenue" data-view="revenue">매출</a>
+      <a href="#ads" data-view="ads">광고 현황</a>
+    </div>
   </nav>
 </header>
 
@@ -75,6 +77,19 @@
     <div class="channels" id="channels" data-active="kikiki"></div>
   </section>
 
+  <!-- ⑤ 광고 현황 (광고 현황 탭 전용) -->
+  <section class="section" data-section="ads" aria-labelledby="h-ads">
+    <div class="section-head"><h2 id="h-ads">광고 / 협찬 문의 현황</h2><span class="hint">두 채널 문의를 한 번에 확인</span></div>
+    <div class="grid kpi-grid" id="ads-kpis"></div>
+    <div class="card">
+      <div class="card-head"><h3>문의 목록</h3><div class="seg" id="ads-filter"></div></div>
+      <div class="table-wrap"><table class="tbl ads-tbl">
+        <thead><tr><th>채널</th><th>브랜드</th><th>카테고리 · 제품</th><th>형태</th><th>경로</th><th>요청일</th><th>소통 현황</th><th>진행 확정</th></tr></thead>
+        <tbody id="ads-rows"></tbody>
+      </table></div>
+    </div>
+  </section>
+
   <!-- 검증 -->
   <section class="section" data-section="verify">
     <details class="card verify">
@@ -88,7 +103,7 @@
 
 <template id="tpl-channel">
   <article class="channel" role="tabpanel">
-    <div class="channel-title"><span class="dot"></span><h3 class="ch-name"></h3><span class="hint ch-period"></span></div>
+    <div class="channel-title"><span class="dot"></span><h3 class="ch-name"></h3><span class="hint ch-period"></span><span class="ch-follow"></span></div>
     <div class="grid kpi-grid small ch-kpis"></div>
     <div class="card top-card">
       <div class="badge-row"><span class="pill">🏆 조회수 1위</span><span class="hint top-meta"></span></div>
