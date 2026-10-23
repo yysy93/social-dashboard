@@ -171,6 +171,7 @@
     renderRevenue();
     renderChannels();
     renderAdsOverview();
+    renderUploads();
     renderVerify();
   }
 
@@ -449,6 +450,94 @@
     </tr>`).join("") : `<tr><td colspan="8" class="hint">등록된 문의가 없어요.</td></tr>`;
   }
 
+  /* ⑥ 채널별 전체 업로드 현황 */
+  const up = { q: "", fmt: "all", sort: "date", dir: "desc", limit: 50, key: null };
+  const UP_COLS = [
+    ["date", "날짜", false], ["format", "포맷", false], ["title", "콘텐츠명", false],
+    ["views", "조회수", true], ["reach", "도달", true], ["likes", "좋아요", true],
+    ["comments", "댓글", true], ["saves", "저장", true], ["shares", "공유", true],
+  ];
+  const dash = (v) => (v ? fmt(v) : '<span class="hint" title="집계 전">-</span>');
+
+  function renderUploads() {
+    const key = document.body.dataset.view;
+    const cfg = CFG.channels.find((c) => c.key === key);
+    if (!cfg || document.body.dataset.sub !== "uploads") return;
+    if (up.key !== key) Object.assign(up, { q: "", fmt: "all", sort: "date", dir: "desc", limit: 50, key });
+    const c = M.channels[key].content;
+    $("#h-uploads").textContent = `${cfg.name} 전체 업로드 현황`;
+    if (!c) { $("#up-kpis").innerHTML = `<p class="hint">콘텐츠 데이터를 불러오지 못했어요.</p>`; $("#up-month").innerHTML = ""; $("#up-rows").innerHTML = ""; return; }
+    const posts = period === "all" ? c.posts : c.posts.filter((p) => p.month === period);
+    $("#up-period").textContent = period === "all" ? `${CFG.year % 100}년 전체` : monthLabel(period);
+
+    // KPI
+    const days = [...new Set(posts.map((p) => p.date))].sort();
+    const fmts = {}; posts.forEach((p) => (fmts[p.format] = (fmts[p.format] || 0) + 1));
+    const fmtText = Object.entries(fmts).sort((a, b) => b[1] - a[1]).map(([f, n]) => `${esc(f)} ${n}`).join(" · ");
+    const last = [...posts].sort((a, b) => (a.date < b.date ? 1 : -1))[0];
+    const k = (label, value, foot) => `<div class="card kpi"><div class="label">${label}</div><div class="value">${value}</div><div class="foot">${foot}</div></div>`;
+    $("#up-kpis").innerHTML =
+      k("총 업로드", `${fmt(posts.length)}건`, fmtText || "-") +
+      k("업로드한 날", `${fmt(days.length)}일`, days.length ? `${days[0]} ~ ${days.at(-1)}` : "-") +
+      k("하루 평균", `${days.length ? fmt1(posts.length / days.length) : 0}건`, "업로드한 날 기준") +
+      k("최근 업로드", last ? last.date.slice(5).replace("-", "/") : "-", last ? esc(last.title) : "-");
+
+    // 월별 표
+    const fmtNames = Object.keys(fmts).sort((a, b) => fmts[b] - fmts[a]);
+    $("#up-month-head").innerHTML = `<tr><th>월</th><th class="num">게시물</th>${fmtNames.map((f) => `<th class="num">${esc(f)}</th>`).join("")}<th class="num">조회수</th><th class="num">평균 조회수</th><th class="num">좋아요</th><th class="num">저장</th><th class="num">공유</th></tr>`;
+    const months = P.byMonth(posts);
+    const row = (label, list, m, cls = "") => `<tr class="${cls}"><td>${label}</td><td class="num">${fmt(m.count)}</td>${fmtNames.map((f) => `<td class="num">${fmt(list.filter((p) => p.format === f).length)}</td>`).join("")}
+      <td class="num">${fmt(m.views)}</td><td class="num">${fmt(m.count ? m.views / m.count : 0)}</td><td class="num">${fmt(m.likes)}</td><td class="num">${fmt(m.saves)}</td><td class="num">${fmt(m.shares)}</td></tr>`;
+    $("#up-month").innerHTML = months.map((m) => row(monthLabel(m.month), posts.filter((p) => p.month === m.month), m)).join("") +
+      (months.length > 1 ? row("합계", posts, P.aggregate(posts), "total") : "");
+
+    // 목록 필터
+    const sel = $("#up-format");
+    sel.innerHTML = `<option value="all">전체 포맷</option>` + fmtNames.map((f) => `<option value="${esc(f)}">${esc(f)}</option>`).join("");
+    sel.value = fmtNames.includes(up.fmt) ? up.fmt : "all";
+    $("#up-search").value = up.q;
+    renderUploadList(posts);
+  }
+
+  function renderUploadList(posts) {
+    if (!posts) {
+      const c = M.channels[up.key]?.content; if (!c) return;
+      posts = period === "all" ? c.posts : c.posts.filter((p) => p.month === period);
+    }
+    const q = up.q.trim().toLowerCase();
+    let list = posts.filter((p) => (up.fmt === "all" || p.format === up.fmt) && (!q || p.title.toLowerCase().includes(q)));
+    const dir = up.dir === "asc" ? 1 : -1;
+    list = [...list].sort((a, b) => {
+      const x = a[up.sort], y = b[up.sort];
+      const r = typeof x === "number" ? x - y : String(x).localeCompare(String(y), "ko");
+      return r !== 0 ? r * dir : a.row - b.row;   // 같은 날짜는 시트 순서대로
+    });
+    $("#up-head").innerHTML = `<tr>${UP_COLS.map(([k, l, n]) => `<th class="sortable ${n ? "num" : ""}" data-k="${k}" ${up.sort === k ? `aria-sort="${up.dir === "asc" ? "ascending" : "descending"}"` : ""}>${l}${up.sort === k ? (up.dir === "asc" ? " ▲" : " ▼") : ""}</th>`).join("")}</tr>`;
+    $("#up-head").querySelectorAll("th").forEach((th) => (th.onclick = () => {
+      const k = th.dataset.k;
+      if (up.sort === k) up.dir = up.dir === "asc" ? "desc" : "asc";
+      else { up.sort = k; up.dir = ["title", "format"].includes(k) ? "asc" : "desc"; }
+      renderUploadList();
+    }));
+    const shown = list.slice(0, up.limit);
+    let prev = null;
+    $("#up-rows").innerHTML = shown.map((p) => {
+      const newDay = up.sort === "date" && prev !== null && prev !== p.date; prev = p.date;
+      return `<tr class="${newDay ? "new-day" : ""}">
+        <td>${p.date.slice(2).replace(/-/g, ".")}</td><td><span class="fmt">${esc(p.format)}</span></td>
+        <td class="t-title">${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.title)}</a>` : esc(p.title)}</td>
+        <td class="num">${dash(p.views)}</td><td class="num">${dash(p.reach)}</td><td class="num">${dash(p.likes)}</td>
+        <td class="num">${dash(p.comments)}</td><td class="num">${dash(p.saves)}</td><td class="num">${dash(p.shares)}</td></tr>`;
+    }).join("") || `<tr><td colspan="9" class="hint">조건에 맞는 콘텐츠가 없어요.</td></tr>`;
+    $("#up-count").textContent = `· ${fmt(list.length)}건 중 ${fmt(shown.length)}건 표시`;
+    const more = $("#up-more");
+    more.hidden = list.length <= up.limit;
+    more.textContent = `${Math.min(50, list.length - up.limit)}개 더 보기`;
+  }
+  $("#up-search").addEventListener("input", (e) => { up.q = e.target.value; up.limit = 50; renderUploadList(); });
+  $("#up-format").addEventListener("change", (e) => { up.fmt = e.target.value; up.limit = 50; renderUploadList(); });
+  $("#up-more").addEventListener("click", () => { up.limit += 50; renderUploadList(); });
+
   /* 검증 */
   const LABEL = { views: "조회수", reach: "도달", likes: "좋아요", comments: "댓글", saves: "저장", shares: "공유" };
   function renderVerify() {
@@ -470,16 +559,22 @@
   }
 
   /* ---------- 이벤트 ---------- */
-  $("#period").addEventListener("change", (e) => { period = e.target.value; renderChannels(); });
+  $("#period").addEventListener("change", (e) => { period = e.target.value; renderChannels(); up.limit = 50; renderUploads(); });
   $("#refresh").addEventListener("click", loadAll);
 
   /* ---------- 보기 탭 (주소 끝 #overview, #followers, #revenue, #kikiki, #gugu) ---------- */
   const VIEWS = ["overview", ...CFG.channels.map((c) => c.key), "revenue", "ads"];
   let dataReady = false;
   function applyView() {
-    const h = location.hash.slice(1);
+    const [h, subRaw] = location.hash.slice(1).split("/");   // 예: #kikiki/uploads
     const view = VIEWS.includes(h) ? h : "overview";
+    const isCh = CFG.channels.some((c) => c.key === view);
     document.body.dataset.view = view;
+    document.body.dataset.sub = isCh && subRaw === "uploads" ? "uploads" : "summary";
+    if (isCh) {
+      const sub = document.body.dataset.sub;
+      $("#channel-subnav").innerHTML = `<a href="#${view}" ${sub === "summary" ? 'aria-current="page"' : ""}>요약</a><a href="#${view}/uploads" ${sub === "uploads" ? 'aria-current="page"' : ""}>전체 업로드 현황</a>`;
+    }
     document.querySelectorAll("#view-tabs a").forEach((a) => {
       if (a.dataset.view === view) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     });
