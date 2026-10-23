@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body data-view="overview">
 <header class="top">
   <div class="wrap top-inner">
     <div>
@@ -22,13 +22,20 @@
       <button id="refresh" class="btn" type="button">↻ 새로고침</button>
     </div>
   </div>
+  <nav class="wrap tabs" id="view-tabs" aria-label="보기 선택">
+    <a href="#overview" data-view="overview">한눈에 보기</a>
+    <a href="#followers" data-view="followers">팔로워</a>
+    <a href="#revenue" data-view="revenue">매출</a>
+    <a href="#kikiki" data-view="kikiki"><i class="dot kikiki"></i>킼킼킼</a>
+    <a href="#gugu" data-view="gugu"><i class="dot gugu"></i>굽굽매거진</a>
+  </nav>
 </header>
 
 <main class="wrap">
   <div id="errors"></div>
 
   <!-- ① 팔로워 비교 -->
-  <section class="section" aria-labelledby="h-followers">
+  <section class="section" data-section="followers" aria-labelledby="h-followers">
     <div class="section-head"><h2 id="h-followers">팔로워 비교</h2><span class="hint" id="followers-range"></span></div>
     <div class="grid follower-grid">
       <div class="card stack" id="follower-cards"></div>
@@ -40,7 +47,7 @@
   </section>
 
   <!-- ② 매출 -->
-  <section class="section" aria-labelledby="h-revenue">
+  <section class="section" data-section="revenue" aria-labelledby="h-revenue">
     <div class="section-head"><h2 id="h-revenue">매출 핵심 지표</h2><span class="hint" id="revenue-check"></span></div>
     <div class="grid kpi-grid" id="revenue-cards"></div>
     <div class="grid two" id="revenue-charts">
@@ -60,7 +67,7 @@
   </section>
 
   <!-- ③④ 채널별 -->
-  <section class="section" aria-labelledby="h-channels">
+  <section class="section" data-section="channels" aria-labelledby="h-channels">
     <div class="section-head">
       <h2 id="h-channels">채널별 콘텐츠 요약</h2>
       <div class="seg" role="tablist" id="channel-tabs"></div>
@@ -69,7 +76,7 @@
   </section>
 
   <!-- 검증 -->
-  <section class="section">
+  <section class="section" data-section="verify">
     <details class="card verify">
       <summary><h2>데이터 검증 결과</h2><span class="hint">시트의 월 합계와 게시물별 직접 계산값 비교</span></summary>
       <div id="verify"></div>
@@ -93,10 +100,10 @@
     <div class="card"><div class="card-head"><h3>월별 조회수</h3></div><div class="chart h-200"><canvas class="ch-month"></canvas></div></div>
     <div class="card"><div class="card-head"><h3>포맷별 평균 조회수</h3></div><div class="chart h-160"><canvas class="ch-format"></canvas></div></div>
     <div class="card">
-      <div class="card-head"><h3>조회수 TOP 5</h3></div>
+      <div class="card-head"><h3 class="top-n-title">조회수 TOP 5</h3></div>
       <div class="table-wrap"><table class="tbl"><thead><tr><th>#</th><th>콘텐츠</th><th class="num">조회수</th><th class="num">공유</th></tr></thead><tbody class="ch-top"></tbody></table></div>
     </div>
-    <div class="card">
+    <div class="card ads-card">
       <div class="card-head"><h3>광고 / 협찬 문의 현황</h3><span class="hint ch-ads-count"></span></div>
       <div class="ads"></div>
     </div>
