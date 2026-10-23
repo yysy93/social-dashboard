@@ -71,6 +71,11 @@
     </div>
   </section>
 
+  <!-- 채널 탭 안의 하위 메뉴: 요약 / 전체 업로드 현황 -->
+  <section class="section" data-section="subnav">
+    <div class="seg subnav" id="channel-subnav"></div>
+  </section>
+
   <!-- ③④ 채널별 -->
   <section class="section" data-section="channels" aria-labelledby="h-channels">
     <div class="section-head">
@@ -78,6 +83,28 @@
       <div class="seg" role="tablist" id="channel-tabs"></div>
     </div>
     <div class="channels" id="channels" data-active="kikiki"></div>
+  </section>
+
+  <!-- 채널별 전체 업로드 현황 -->
+  <section class="section" data-section="uploads" aria-labelledby="h-uploads">
+    <div class="section-head"><h2 id="h-uploads">전체 업로드 현황</h2><span class="hint" id="up-period"></span></div>
+    <div class="grid kpi-grid" id="up-kpis"></div>
+    <div class="card">
+      <div class="card-head"><h3>월별 업로드 현황</h3><span class="hint">시트의 '월 전체' 행 대신 게시물을 직접 집계</span></div>
+      <div class="table-wrap"><table class="tbl up-month"><thead id="up-month-head"></thead><tbody id="up-month"></tbody></table></div>
+    </div>
+    <div class="card up-list-card">
+      <div class="card-head">
+        <h3>전체 콘텐츠 목록 <span class="hint" id="up-count"></span></h3>
+        <div class="up-controls">
+          <input type="search" id="up-search" placeholder="콘텐츠명 검색" aria-label="콘텐츠명 검색">
+          <select id="up-format" aria-label="포맷"></select>
+        </div>
+      </div>
+      <div class="table-wrap"><table class="tbl up-tbl"><thead id="up-head"></thead><tbody id="up-rows"></tbody></table></div>
+      <div class="up-more"><button class="btn" id="up-more" type="button">50개 더 보기</button></div>
+      <p class="hint up-note">'-' 는 아직 수치가 입력되지 않은(집계 전) 값이에요. 열 제목을 누르면 정렬돼요.</p>
+    </div>
   </section>
 
   <!-- ⑤ 광고 현황 (광고 현황 탭 전용) -->
