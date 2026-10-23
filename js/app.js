@@ -102,6 +102,7 @@
       else { delete loaded[id]; errors[id] = { message: r.reason.message, tried: r.reason.tried || [] }; }
     });
     buildModel();
+    dataReady = true;
     render();
     const nErr = Object.keys(errors).length;
     const time = new Date().toLocaleString("ko-KR", { month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" });
@@ -308,6 +309,10 @@
       tabs.querySelectorAll("button").forEach((x) => x.setAttribute("aria-selected", x === b));
       Object.values(charts).forEach((c) => c.resize());
     });
+    const view = document.body.dataset.view;
+    const solo = CFG.channels.some((c) => c.key === view);
+    if (solo) host.dataset.active = view;          // 모바일에서도 선택한 채널이 보이도록
+    const topN = solo ? 10 : 5;
     host.innerHTML = "";
     CFG.channels.forEach((cfg) => {
       const ch = M.channels[cfg.key];
@@ -369,7 +374,8 @@
       });
 
       // TOP 5
-      $(".ch-top", el).innerHTML = sorted.slice(0, 5).map((p, i) => `<tr>
+      $(".top-n-title", el).textContent = `조회수 TOP ${topN}`;
+      $(".ch-top", el).innerHTML = sorted.slice(0, topN).map((p, i) => `<tr>
         <td>${i + 1}</td>
         <td class="t-title">${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.title)}</a>` : esc(p.title)}<div class="t-sub">${p.date} · ${esc(p.format)}</div></td>
         <td class="num">${fmt(p.views)}</td><td class="num">${fmt(p.shares)}</td></tr>`).join("") || `<tr><td colspan="4" class="hint">게시물이 없어요.</td></tr>`;
@@ -434,6 +440,21 @@
   /* ---------- 이벤트 ---------- */
   $("#period").addEventListener("change", (e) => { period = e.target.value; renderChannels(); });
   $("#refresh").addEventListener("click", loadAll);
+
+  /* ---------- 보기 탭 (주소 끝 #overview, #followers, #revenue, #kikiki, #gugu) ---------- */
+  const VIEWS = ["overview", "followers", "revenue", ...CFG.channels.map((c) => c.key)];
+  let dataReady = false;
+  function applyView() {
+    const h = location.hash.slice(1);
+    const view = VIEWS.includes(h) ? h : "overview";
+    document.body.dataset.view = view;
+    document.querySelectorAll("#view-tabs a").forEach((a) => {
+      if (a.dataset.view === view) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+    });
+    if (dataReady) render();                       // 보이게 된 차트를 올바른 크기로 다시 그림
+  }
+  window.addEventListener("hashchange", () => { applyView(); window.scrollTo({ top: 0 }); });
+  applyView();
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", render);
   if (CFG.autoRefreshMinutes > 0) setInterval(() => { if (!document.hidden) loadAll(); }, CFG.autoRefreshMinutes * 60000);
 
