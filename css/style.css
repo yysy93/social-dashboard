@@ -272,7 +272,6 @@ main.wrap { padding-top: 36px; padding-bottom: 32px; }
 .up-tbl th.sortable:hover { color: var(--text); }
 .up-tbl th[aria-sort] { color: var(--text); }
 .up-tbl td.t-title { white-space: normal; min-width: 240px; max-width: 420px; }
-.up-tbl .fmt { font-size: 12px; padding: 2px 8px; border-radius: 6px; background: var(--neutral-soft); color: var(--text-2); }
 .up-tbl tr.new-day td { border-top: 1px solid var(--line); }
 .up-controls { display: flex; gap: 8px; flex-wrap: wrap; }
 .up-controls input { font: inherit; font-size: 14px; color: var(--text); background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; width: 220px; max-width: 100%; }
@@ -280,3 +279,35 @@ main.wrap { padding-top: 36px; padding-bottom: 32px; }
 .up-note { margin: 10px 0 0; font-size: 12px; }
 .up-list-card, .section[data-section="uploads"] > .card { margin-top: 14px; }
 @media (max-width: 480px) { .up-controls, .up-controls input { width: 100%; } }
+
+/* ===== 포맷 색상 (연한 배경 + 같은 계열 진한 글자) ===== */
+:root {
+  --fmt-single-bg: #e8f0fc;   --fmt-single-fg: #2d5f9e;
+  --fmt-carousel-bg: #e4f3ea; --fmt-carousel-fg: #2e7350;
+  --fmt-reels-bg: #fbe8f0;    --fmt-reels-fg: #a3416b;
+  --fmt-plan-bg: #fcf1d8;     --fmt-plan-fg: #8a5f00;
+  --fmt-ad-bg: #eeebfa;       --fmt-ad-fg: #5a4ab3;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --fmt-single-bg: #1b2a3f;   --fmt-single-fg: #9cc0f0;
+    --fmt-carousel-bg: #18301f; --fmt-carousel-fg: #8fd1a9;
+    --fmt-reels-bg: #361c28;    --fmt-reels-fg: #eda5c4;
+    --fmt-plan-bg: #33280f;     --fmt-plan-fg: #e8c06a;
+    --fmt-ad-bg: #262040;       --fmt-ad-fg: #b8adf2;
+  }
+}
+:root[data-theme="dark"] {
+  --fmt-single-bg: #1b2a3f;   --fmt-single-fg: #9cc0f0;
+  --fmt-carousel-bg: #18301f; --fmt-carousel-fg: #8fd1a9;
+  --fmt-reels-bg: #361c28;    --fmt-reels-fg: #eda5c4;
+  --fmt-plan-bg: #33280f;     --fmt-plan-fg: #e8c06a;
+  --fmt-ad-bg: #262040;       --fmt-ad-fg: #b8adf2;
+}
+.fmt { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 6px; white-space: nowrap; background: var(--neutral-soft); color: var(--text-2); }
+.fmt-single   { background: var(--fmt-single-bg);   color: var(--fmt-single-fg); }
+.fmt-carousel { background: var(--fmt-carousel-bg); color: var(--fmt-carousel-fg); }
+.fmt-reels    { background: var(--fmt-reels-bg);    color: var(--fmt-reels-fg); }
+.fmt-plan     { background: var(--fmt-plan-bg);     color: var(--fmt-plan-fg); }
+.fmt-ad       { background: var(--fmt-ad-bg);       color: var(--fmt-ad-fg); }
+.up-month th .fmt { font-size: 11px; }
