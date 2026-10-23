@@ -457,6 +457,10 @@
     ["views", "조회수", true], ["reach", "도달", true], ["likes", "좋아요", true],
     ["comments", "댓글", true], ["saves", "저장", true], ["shares", "공유", true],
   ];
+  // 포맷 → 색상 클래스 ('광고'·'기획'이 들어간 포맷을 먼저 구분)
+  const FMT_CLASS = [["광고", "ad"], ["기획", "plan"], ["릴스", "reels"], ["캐러셀", "carousel"], ["단일", "single"]];
+  const fmtClass = (f) => (FMT_CLASS.find(([k]) => String(f).includes(k)) || [, "etc"])[1];
+  const fmtBadge = (f) => `<span class="fmt fmt-${fmtClass(f)}">${esc(f)}</span>`;
   const dash = (v) => (v ? fmt(v) : '<span class="hint" title="집계 전">-</span>');
 
   function renderUploads() {
@@ -484,7 +488,7 @@
 
     // 월별 표
     const fmtNames = Object.keys(fmts).sort((a, b) => fmts[b] - fmts[a]);
-    $("#up-month-head").innerHTML = `<tr><th>월</th><th class="num">게시물</th>${fmtNames.map((f) => `<th class="num">${esc(f)}</th>`).join("")}<th class="num">조회수</th><th class="num">평균 조회수</th><th class="num">좋아요</th><th class="num">저장</th><th class="num">공유</th></tr>`;
+    $("#up-month-head").innerHTML = `<tr><th>월</th><th class="num">게시물</th>${fmtNames.map((f) => `<th class="num">${fmtBadge(f)}</th>`).join("")}<th class="num">조회수</th><th class="num">평균 조회수</th><th class="num">좋아요</th><th class="num">저장</th><th class="num">공유</th></tr>`;
     const months = P.byMonth(posts);
     const row = (label, list, m, cls = "") => `<tr class="${cls}"><td>${label}</td><td class="num">${fmt(m.count)}</td>${fmtNames.map((f) => `<td class="num">${fmt(list.filter((p) => p.format === f).length)}</td>`).join("")}
       <td class="num">${fmt(m.views)}</td><td class="num">${fmt(m.count ? m.views / m.count : 0)}</td><td class="num">${fmt(m.likes)}</td><td class="num">${fmt(m.saves)}</td><td class="num">${fmt(m.shares)}</td></tr>`;
@@ -524,7 +528,7 @@
     $("#up-rows").innerHTML = shown.map((p) => {
       const newDay = up.sort === "date" && prev !== null && prev !== p.date; prev = p.date;
       return `<tr class="${newDay ? "new-day" : ""}">
-        <td>${p.date.slice(2).replace(/-/g, ".")}</td><td><span class="fmt">${esc(p.format)}</span></td>
+        <td>${p.date.slice(2).replace(/-/g, ".")}</td><td>${fmtBadge(p.format)}</td>
         <td class="t-title">${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.title)}</a>` : esc(p.title)}</td>
         <td class="num">${dash(p.views)}</td><td class="num">${dash(p.reach)}</td><td class="num">${dash(p.likes)}</td>
         <td class="num">${dash(p.comments)}</td><td class="num">${dash(p.saves)}</td><td class="num">${dash(p.shares)}</td></tr>`;
