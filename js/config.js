@@ -8,7 +8,7 @@ window.DASHBOARD_CONFIG = {
   sheetId: "10_Vsdl_oEJVoiDcxbNxp7IL35wcHT5rDVfqe7wib36k",
 
   // (선택) '파일 → 공유 → 웹에 게시'를 쓰면 .../d/e/[여기]/pub 부분을 넣으세요. 비워 두면 링크 공유 방식 사용.
-  publishedKey: "",
+  publishedKey: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRFzI8QNvUrCYBHTXHzsZd3hs1RGAZDKMXKwNMYx8EDabdOIXKAvA2WKspmTipM6fCmdQ0_AsHX5C_7/pub?gid=1464159702&single=true&output=csv",
 
   // 이 날짜 이후 게시물만 집계 (23~24년 롱폼 제외)
   fromDate: "2026-01-01",
