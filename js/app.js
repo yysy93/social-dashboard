@@ -32,11 +32,22 @@
   const loaded = {};     // id → rows
   const errors = {};     // id → { message, tried }
 
+  // '웹에 게시' 주소 전체를 붙여 넣어도, 2PACX-… 부분만 넣어도 동작
+  const PUB_KEY = (() => {
+    const v = String(CFG.publishedKey || "").trim();
+    const m = v.match(/\/d\/e\/([^/?#]+)/);
+    return m ? m[1] : v;
+  })();
+
   function urlsFor(src) {
     const bust = `_=${Date.now()}`;
     const list = [];
-    if (CFG.publishedKey && src.gid)
-      list.push(`https://docs.google.com/spreadsheets/d/e/${CFG.publishedKey}/pub?gid=${src.gid}&single=true&output=csv&${bust}`);
+    // 1순위: 웹에 게시(CSV) — 시트에 보이는 값 그대로 내려줌 (가장 정확)
+    if (PUB_KEY && src.gid)
+      list.push(`https://docs.google.com/spreadsheets/d/e/${PUB_KEY}/pub?gid=${src.gid}&single=true&output=csv&${bust}`);
+    // 2순위: 내보내기(CSV) — 다운로드와 같은 형식
+    if (src.gid) list.push(`https://docs.google.com/spreadsheets/d/${CFG.sheetId}/export?format=csv&gid=${src.gid}&${bust}`);
+    // 3순위: gviz — 열마다 숫자/글자 중 많은 쪽만 남기고 나머지 글자를 지우는 경우가 있어 마지막에 시도
     const base = `https://docs.google.com/spreadsheets/d/${CFG.sheetId}/gviz/tq?tqx=out:csv&headers=0`;
     if (src.gid) list.push(`${base}&gid=${src.gid}&${bust}`);
     if (src.sheet) list.push(`${base}&sheet=${encodeURIComponent(src.sheet)}&${bust}`);
@@ -54,7 +65,7 @@
     if (/^\s*<(!doctype|html)/i.test(head))
       throw new Error("CSV 대신 로그인 페이지가 왔어요. 시트 공유를 '링크가 있는 모든 사용자: 뷰어'로 바꿔 주세요.");
     if (src.expect && !src.expect.some((k) => head.includes(k)))
-      throw new Error(`다른 탭을 읽은 것 같아요(탭 이름/gid 확인 필요). 기대한 글자: ${src.expect.join(" 또는 ")}`);
+      throw new Error(`데이터 일부가 빠진 채로 왔어요. config.js에 '웹에 게시' 주소(publishedKey)를 넣어 주세요. gid가 맞는지도 확인해 주세요. (찾는 글자: ${src.expect.join(" 또는 ")})`);
   }
 
   async function fetchSource(src) {
