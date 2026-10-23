@@ -2,7 +2,7 @@
  * config.js — 이 파일만 수정하면 됩니다.
  * ========================================================= */
 window.DASHBOARD_CONFIG = {
-  title: "소셜링 인기페이지 대시보드",
+  title: "소셜링 파워페이지 대시보드",
 
   // 구글 시트 주소 .../spreadsheets/d/[여기]/edit 부분
   sheetId: "10_Vsdl_oEJVoiDcxbNxp7IL35wcHT5rDVfqe7wib36k",
