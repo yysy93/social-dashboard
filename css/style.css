@@ -246,4 +246,14 @@ body[data-view="kikiki"] .channel-title h3, body[data-view="gugu"] .channel-titl
 .top-inner { padding-bottom: 10px; }
 .top { border-bottom: 0; }
 body[data-view="revenue"] #period, body[data-view="ads"] #period { display: none; }
-main { padding-top: 24px; }
+
+/* ===== 로고 · 탭 색상/간격 ===== */
+:root { --tab-accent: #6a58c9; }
+.brand { display: flex; align-items: center; gap: 12px; }
+.logo { width: 40px; height: 40px; flex: none; display: block; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .logo { filter: invert(1); } }
+:root[data-theme="dark"] .logo { filter: invert(1); }
+@media (max-width: 480px) { .logo { width: 34px; height: 34px; } h1 { font-size: 18px; } }
+main.wrap { padding-top: 36px; padding-bottom: 32px; }
+@media (max-width: 480px) { main.wrap { padding-top: 28px; } }
+.tabs a[aria-current="page"]::after { height: 3px; border-radius: 3px 3px 0 0; }
