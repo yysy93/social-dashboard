@@ -250,9 +250,7 @@ body[data-view="revenue"] #period, body[data-view="ads"] #period { display: none
 /* ===== 로고 · 탭 색상/간격 ===== */
 :root { --tab-accent: #6a58c9; }
 .brand { display: flex; align-items: center; gap: 12px; }
-.logo { width: 40px; height: 40px; flex: none; display: block; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .logo { filter: invert(1); } }
-:root[data-theme="dark"] .logo { filter: invert(1); }
+.logo { width: 40px; height: 40px; flex: none; display: block; color: var(--text); }
 @media (max-width: 480px) { .logo { width: 34px; height: 34px; } h1 { font-size: 18px; } }
 main.wrap { padding-top: 36px; padding-bottom: 32px; }
 @media (max-width: 480px) { main.wrap { padding-top: 28px; } }
