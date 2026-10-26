@@ -274,11 +274,11 @@ main.wrap { padding-top: 36px; padding-bottom: 32px; }
 .up-tbl td.t-title { white-space: normal; min-width: 240px; max-width: 420px; }
 .up-tbl tr.new-day td { border-top: 1px solid var(--line); }
 .up-controls { display: flex; gap: 8px; flex-wrap: wrap; }
-.up-controls input { font: inherit; font-size: 14px; color: var(--text); background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; width: 220px; max-width: 100%; }
+.up-controls input[type="search"] { font: inherit; font-size: 14px; color: var(--text); background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; width: 220px; max-width: 100%; }
 .up-more { text-align: center; margin-top: 12px; }
 .up-note { margin: 10px 0 0; font-size: 12px; }
 .up-list-card, .section[data-section="uploads"] > .card { margin-top: 14px; }
-@media (max-width: 480px) { .up-controls, .up-controls input { width: 100%; } }
+@media (max-width: 480px) { .up-controls, .up-controls input[type="search"] { width: 100%; } }
 
 /* ===== 포맷 색상 (연한 배경 + 같은 계열 진한 글자) ===== */
 :root {
@@ -311,3 +311,33 @@ main.wrap { padding-top: 36px; padding-bottom: 32px; }
 .fmt-plan     { background: var(--fmt-plan-bg);     color: var(--fmt-plan-fg); }
 .fmt-ad       { background: var(--fmt-ad-bg);       color: var(--fmt-ad-fg); }
 .up-month th .fmt { font-size: 11px; }
+
+/* ===== 인기 콘텐츠 하이라이트 (좋아요 5,000 이상 또는 공유 50 초과) ===== */
+:root { --hot-row: #fff5f1; --hot-bar: #e5603f; --hot-fg: #b8432a; --hot-chip: #fde6df; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --hot-row: #2a1b17; --hot-bar: #f07a5f; --hot-fg: #f6a48f; --hot-chip: #3d221c; }
+}
+:root[data-theme="dark"] { --hot-row: #2a1b17; --hot-bar: #f07a5f; --hot-fg: #f6a48f; --hot-chip: #3d221c; }
+.up-tbl tr.hot td { background: var(--hot-row); }
+.up-tbl tr.hot td:first-child { box-shadow: inset 3px 0 0 var(--hot-bar); }
+.up-tbl td.hot-cell { color: var(--hot-fg); font-weight: 800; }
+.hot-badge { margin-right: 6px; cursor: help; }
+.hot-legend { display: inline-block; font-weight: 700; color: var(--hot-fg); background: var(--hot-chip); padding: 1px 8px; border-radius: 6px; }
+.hot-toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: var(--text-2); background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 7px 12px; cursor: pointer; white-space: nowrap; }
+.hot-toggle:has(input:checked) { color: var(--hot-fg); border-color: var(--hot-bar); background: var(--hot-chip); font-weight: 700; }
+.hot-toggle input { accent-color: var(--hot-bar); margin: 0; }
+
+/* ===== 채널 탭 팔로워 카드 ===== */
+.follow-card { grid-column: 1 / -1; }
+.fc-body { display: grid; gap: 18px; grid-template-columns: 1fr; margin-bottom: 14px; }
+@media (min-width: 900px) { .fc-body { grid-template-columns: 280px 1fr; align-items: center; } }
+.fc-now { font-size: 40px; font-weight: 800; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.fc-now span { font-size: 16px; font-weight: 500; color: var(--muted); margin-left: 4px; }
+.fc-sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.fc-list { margin: 14px 0 0; display: grid; gap: 8px; }
+.fc-list div { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; border-top: 1px solid var(--line); padding-top: 8px; }
+.fc-list dt { color: var(--text-2); }
+.fc-list dd { margin: 0; font-variant-numeric: tabular-nums; text-align: right; }
+.fc-table td, .fc-table th { white-space: nowrap; }
+.channel[data-key="kikiki"] .follow-card { border-top: 3px solid var(--kikiki); }
+.channel[data-key="gugu"] .follow-card { border-top: 3px solid var(--gugu); }
