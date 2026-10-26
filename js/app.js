@@ -402,6 +402,16 @@
     const thisM = byM[months.at(-1)];
     const peak = pts.reduce((a, b) => (b.value > a.value ? b : a));
     $(".fc-range", card).textContent = `${first.date} ~ ${last.date} · 측정 ${pts.length}회`;
+    // 접힌 상태에서 보이는 한 줄 요약
+    $(".fc-brief", card).innerHTML = `<b>${fmt(last.value)}명</b><span class="fc-sep">·</span>${md(first.date)} 대비 ${delta(first.value, last.value)}<span class="fc-sep">·</span>이번 달 ${delta(thisM[0].value, last.value)}`;
+    // 펼침 상태 기억 (브라우저별, 실패해도 기본값=접힘)
+    let open = false;
+    try { open = localStorage.getItem("followCardOpen") === "1"; } catch (_) {}
+    card.open = open;
+    card.ontoggle = () => {
+      try { localStorage.setItem("followCardOpen", card.open ? "1" : "0"); } catch (_) {}
+      if (card.open) charts[`${cfg.key}-follow`]?.resize();
+    };
     $(".fc-stats", card).innerHTML = `
       <div class="fc-now">${fmt(last.value)}<span>명</span></div>
       <div class="fc-sub">${md(last.date)} 기준</div>
@@ -577,11 +587,11 @@
       const why = [hotLikes(p) && `좋아요 ${fmt(HL.likes)} 이상`, hotShares(p) && `공유 ${fmt(HL.shares)} 초과`].filter(Boolean).join(" · ");
       return `<tr class="${newDay ? "new-day" : ""} ${hot ? "hot" : ""}">
         <td>${p.date.slice(2).replace(/-/g, ".")}</td><td>${fmtBadge(p.format)}</td>
-        <td class="t-title">${hot ? `<span class="hot-badge" title="${why}">🔥</span>` : ""}${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.title)}</a>` : esc(p.title)}</td>
+        <td class="t-title" ${hot ? `title="인기 콘텐츠: ${why}"` : ""}>${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.title)}</a>` : esc(p.title)}</td>
         <td class="num">${dash(p.views)}</td><td class="num">${dash(p.reach)}</td><td class="num ${hotLikes(p) ? "hot-cell" : ""}">${dash(p.likes)}</td>
         <td class="num">${dash(p.comments)}</td><td class="num">${dash(p.saves)}</td><td class="num ${hotShares(p) ? "hot-cell" : ""}">${dash(p.shares)}</td></tr>`;
     }).join("") || `<tr><td colspan="9" class="hint">조건에 맞는 콘텐츠가 없어요.</td></tr>`;
-    $("#up-count").textContent = `· ${fmt(list.length)}건 중 ${fmt(shown.length)}건 표시 · 🔥 인기 ${fmt(hotTotal)}건`;
+    $("#up-count").textContent = `· ${fmt(list.length)}건 중 ${fmt(shown.length)}건 표시 · 인기 ${fmt(hotTotal)}건`;
     $("#hot-rule").textContent = `= 좋아요 ${fmt(HL.likes)} 이상 또는 공유 ${fmt(HL.shares)} 초과`;
     $("#up-hot").checked = up.hot;
     const more = $("#up-more");
