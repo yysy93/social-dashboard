@@ -341,3 +341,22 @@ main.wrap { padding-top: 36px; padding-bottom: 32px; }
 .fc-table td, .fc-table th { white-space: nowrap; }
 .channel[data-key="kikiki"] .follow-card { border-top: 3px solid var(--kikiki); }
 .channel[data-key="gugu"] .follow-card { border-top: 3px solid var(--gugu); }
+
+/* ===== 팔로워 카드 접기/펼치기 ===== */
+.follow-card { padding: 0; }
+.fc-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 16px 18px; cursor: pointer; list-style: none; user-select: none; }
+.fc-summary::-webkit-details-marker { display: none; }
+.fc-summary h3 { margin: 0; }
+.fc-brief { font-size: 14px; color: var(--text-2); font-variant-numeric: tabular-nums; display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.fc-brief b { color: var(--text); font-size: 15px; }
+.fc-sep { color: var(--line); margin: 0 4px; }
+.fc-toggle { margin-left: auto; font-size: 13px; font-weight: 600; color: var(--text-2); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; white-space: nowrap; }
+.fc-toggle::after { content: " ▾"; }
+.follow-card[open] .fc-toggle::after { content: " ▴"; }
+.fc-close-t, .follow-card[open] .fc-open-t { display: none; }
+.follow-card[open] .fc-close-t { display: inline; }
+.fc-summary:hover .fc-toggle { color: var(--text); border-color: var(--muted); }
+.follow-card > .fc-range { padding: 0 18px; margin: -4px 0 10px; font-size: 13px; }
+.follow-card > .fc-body, .follow-card > .table-wrap { padding: 0 18px; }
+.follow-card > .table-wrap { padding-bottom: 14px; }
+@media (max-width: 480px) { .fc-toggle { margin-left: 0; } }
