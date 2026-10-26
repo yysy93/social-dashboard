@@ -329,6 +329,7 @@
       }
       host.appendChild(el);
       renderAds(el, ch.ads);
+      if (solo) renderFollowCard(el, cfg); else $(".follow-card", el).remove();
       if (!ch.content) { $(".ch-kpis", el).innerHTML = `<p class="hint">콘텐츠 데이터를 불러오지 못했어요.</p>`; [".top-card"].forEach((s) => ($(s, el).hidden = true)); return; }
 
       const all = ch.content.posts;
@@ -388,6 +389,45 @@
         <td class="num">${fmt(p.views)}</td><td class="num">${fmt(p.shares)}</td></tr>`).join("") || `<tr><td colspan="4" class="hint">게시물이 없어요.</td></tr>`;
     });
   }
+  // 채널 탭 전용 팔로워 카드: 현재 수 · 증감 · 추이 차트 · 월별 증감표
+  function renderFollowCard(el, cfg) {
+    const card = $(".follow-card", el);
+    const f = followerOf(cfg);
+    if (!f || !f.points.length) { $(".fc-stats", card).innerHTML = `<p class="hint">팔로워 데이터를 불러오지 못했어요.</p>`; return; }
+    const pts = f.points, first = pts[0], last = pts.at(-1);
+    const md = (d) => `${+d.slice(5, 7)}/${+d.slice(8)}`;
+    const delta = (a, b) => { const d = b - a; return `<span class="${d >= 0 ? "delta-up" : "delta-down"}">${d >= 0 ? "▲" : "▼"} ${signed(d)} (${pct((d / a) * 100)})</span>`; };
+    const byM = {}; pts.forEach((p) => (byM[p.date.slice(0, 7)] ||= []).push(p));
+    const months = Object.keys(byM).sort();
+    const thisM = byM[months.at(-1)];
+    const peak = pts.reduce((a, b) => (b.value > a.value ? b : a));
+    $(".fc-range", card).textContent = `${first.date} ~ ${last.date} · 측정 ${pts.length}회`;
+    $(".fc-stats", card).innerHTML = `
+      <div class="fc-now">${fmt(last.value)}<span>명</span></div>
+      <div class="fc-sub">${md(last.date)} 기준</div>
+      <dl class="fc-list">
+        <div><dt>${md(first.date)} 대비</dt><dd>${delta(first.value, last.value)}</dd></div>
+        <div><dt>이번 달 (${md(thisM[0].date)}~)</dt><dd>${delta(thisM[0].value, last.value)}</dd></div>
+        <div><dt>기간 최고</dt><dd>${fmt(peak.value)}명 <span class="hint">${md(peak.date)}</span></dd></div>
+        ${f.baseline ? `<div><dt>시작일 기준값</dt><dd>${fmt(f.baseline)}명</dd></div>` : ""}
+      </dl>`;
+    $(".fc-rows", card).innerHTML = months.map((m) => {
+      const a = byM[m][0], b = byM[m].at(-1), d = b.value - a.value;
+      return `<tr><td>${monthLabel(m)}</td><td class="num">${fmt(a.value)} <span class="hint">${md(a.date)}</span></td><td class="num">${fmt(b.value)} <span class="hint">${md(b.date)}</span></td>
+        <td class="num ${d >= 0 ? "delta-up" : "delta-down"}">${signed(d)}</td><td class="num ${d >= 0 ? "delta-up" : "delta-down"}">${pct((d / a.value) * 100)}</td></tr>`;
+    }).join("");
+    chart(`${cfg.key}-follow`, $(".ch-follow-chart", card), {
+      type: "line",
+      data: { labels: pts.map((p) => md(p.date)),
+        datasets: [{ label: "팔로워", data: pts.map((p) => p.value), borderColor: css(`--${cfg.color}`), backgroundColor: css(`--${cfg.color}`),
+          borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, tension: 0.25 }] },
+      options: {
+        scales: { y: { ticks: { callback: (v) => fmt(v) } } },
+        plugins: { tooltip: { callbacks: { label: (c) => ` 팔로워 ${fmt(c.parsed.y)}명` } } },
+      },
+    });
+  }
+
   const avgOf = (a) => a.reduce((x, y) => x + y, 0) / (a.length || 1);
   function median(a) { if (!a.length) return 0; const s = [...a].sort((x, y) => x - y); const m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; }
 
@@ -451,7 +491,12 @@
   }
 
   /* ⑥ 채널별 전체 업로드 현황 */
-  const up = { q: "", fmt: "all", sort: "date", dir: "desc", limit: 50, key: null };
+  const up = { q: "", fmt: "all", hot: false, sort: "date", dir: "desc", limit: 50, key: null };
+  // 인기 기준 (config.js에 highlight: { likes: 5000, shares: 50 } 을 넣으면 그 값으로 바뀜)
+  const HL = { likes: CFG.highlight?.likes ?? 5000, shares: CFG.highlight?.shares ?? 50 };
+  const hotLikes = (p) => p.likes >= HL.likes;      // 좋아요 5,000 이상
+  const hotShares = (p) => p.shares > HL.shares;    // 공유 50 초과
+  const isHot = (p) => hotLikes(p) || hotShares(p);
   const UP_COLS = [
     ["date", "날짜", false], ["format", "포맷", false], ["title", "콘텐츠명", false],
     ["views", "조회수", true], ["reach", "도달", true], ["likes", "좋아요", true],
@@ -467,7 +512,7 @@
     const key = document.body.dataset.view;
     const cfg = CFG.channels.find((c) => c.key === key);
     if (!cfg || document.body.dataset.sub !== "uploads") return;
-    if (up.key !== key) Object.assign(up, { q: "", fmt: "all", sort: "date", dir: "desc", limit: 50, key });
+    if (up.key !== key) Object.assign(up, { q: "", fmt: "all", hot: false, sort: "date", dir: "desc", limit: 50, key });
     const c = M.channels[key].content;
     $("#h-uploads").textContent = `${cfg.name} 전체 업로드 현황`;
     if (!c) { $("#up-kpis").innerHTML = `<p class="hint">콘텐츠 데이터를 불러오지 못했어요.</p>`; $("#up-month").innerHTML = ""; $("#up-rows").innerHTML = ""; return; }
@@ -509,7 +554,8 @@
       posts = period === "all" ? c.posts : c.posts.filter((p) => p.month === period);
     }
     const q = up.q.trim().toLowerCase();
-    let list = posts.filter((p) => (up.fmt === "all" || p.format === up.fmt) && (!q || p.title.toLowerCase().includes(q)));
+    let list = posts.filter((p) => (up.fmt === "all" || p.format === up.fmt) && (!q || p.title.toLowerCase().includes(q)) && (!up.hot || isHot(p)));
+    const hotTotal = posts.filter(isHot).length;
     const dir = up.dir === "asc" ? 1 : -1;
     list = [...list].sort((a, b) => {
       const x = a[up.sort], y = b[up.sort];
@@ -527,19 +573,24 @@
     let prev = null;
     $("#up-rows").innerHTML = shown.map((p) => {
       const newDay = up.sort === "date" && prev !== null && prev !== p.date; prev = p.date;
-      return `<tr class="${newDay ? "new-day" : ""}">
+      const hot = isHot(p);
+      const why = [hotLikes(p) && `좋아요 ${fmt(HL.likes)} 이상`, hotShares(p) && `공유 ${fmt(HL.shares)} 초과`].filter(Boolean).join(" · ");
+      return `<tr class="${newDay ? "new-day" : ""} ${hot ? "hot" : ""}">
         <td>${p.date.slice(2).replace(/-/g, ".")}</td><td>${fmtBadge(p.format)}</td>
-        <td class="t-title">${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.title)}</a>` : esc(p.title)}</td>
-        <td class="num">${dash(p.views)}</td><td class="num">${dash(p.reach)}</td><td class="num">${dash(p.likes)}</td>
-        <td class="num">${dash(p.comments)}</td><td class="num">${dash(p.saves)}</td><td class="num">${dash(p.shares)}</td></tr>`;
+        <td class="t-title">${hot ? `<span class="hot-badge" title="${why}">🔥</span>` : ""}${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.title)}</a>` : esc(p.title)}</td>
+        <td class="num">${dash(p.views)}</td><td class="num">${dash(p.reach)}</td><td class="num ${hotLikes(p) ? "hot-cell" : ""}">${dash(p.likes)}</td>
+        <td class="num">${dash(p.comments)}</td><td class="num">${dash(p.saves)}</td><td class="num ${hotShares(p) ? "hot-cell" : ""}">${dash(p.shares)}</td></tr>`;
     }).join("") || `<tr><td colspan="9" class="hint">조건에 맞는 콘텐츠가 없어요.</td></tr>`;
-    $("#up-count").textContent = `· ${fmt(list.length)}건 중 ${fmt(shown.length)}건 표시`;
+    $("#up-count").textContent = `· ${fmt(list.length)}건 중 ${fmt(shown.length)}건 표시 · 🔥 인기 ${fmt(hotTotal)}건`;
+    $("#hot-rule").textContent = `= 좋아요 ${fmt(HL.likes)} 이상 또는 공유 ${fmt(HL.shares)} 초과`;
+    $("#up-hot").checked = up.hot;
     const more = $("#up-more");
     more.hidden = list.length <= up.limit;
     more.textContent = `${Math.min(50, list.length - up.limit)}개 더 보기`;
   }
   $("#up-search").addEventListener("input", (e) => { up.q = e.target.value; up.limit = 50; renderUploadList(); });
   $("#up-format").addEventListener("change", (e) => { up.fmt = e.target.value; up.limit = 50; renderUploadList(); });
+  $("#up-hot").addEventListener("change", (e) => { up.hot = e.target.checked; up.limit = 50; renderUploadList(); });
   $("#up-more").addEventListener("click", () => { up.limit += 50; renderUploadList(); });
 
   /* 검증 */
