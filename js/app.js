@@ -648,7 +648,12 @@
   window.addEventListener("hashchange", () => { applyView(); window.scrollTo({ top: 0 }); });
   applyView();
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", render);
-  if (CFG.autoRefreshMinutes > 0) setInterval(() => { if (!document.hidden) loadAll(); }, CFG.autoRefreshMinutes * 60000);
-
-  loadAll();
+  // 잠금이 풀린 뒤에만 데이터를 불러옴 (lock.js가 호출)
+  let started = false;
+  window.startDashboard = () => {
+    if (started) return;
+    started = true;
+    loadAll();
+    if (CFG.autoRefreshMinutes > 0) setInterval(() => { if (!document.hidden) loadAll(); }, CFG.autoRefreshMinutes * 60000);
+  };
 })();
