@@ -25,10 +25,6 @@
     $("#lock").hidden = true;
     window.startDashboard && window.startDashboard();
   }
-  function lockNow() {
-    write(sessionStorage, null); write(localStorage, null);
-    location.reload();
-  }
 
   // 이미 이 브라우저에서 잠금을 풀었으면 바로 열기
   if (read(sessionStorage) === LOCK.check || read(localStorage) === LOCK.check) { unlock(); }
@@ -65,5 +61,4 @@
     }
     btn.disabled = false;
   });
-  $("#lock-out").addEventListener("click", lockNow);
 })();
