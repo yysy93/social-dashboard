@@ -378,3 +378,10 @@ body.locked > header, body.locked > main, body.locked > footer { display: none; 
 .lock-msg { margin: 0; min-height: 20px; font-size: 13px; color: var(--warn); }
 .shake { animation: shake .35s; }
 @keyframes shake { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+
+/* ===== 상단 제목 영역 흰색 · 잠금 화면 차콜 배경 ===== */
+.top { background: var(--card); backdrop-filter: none; }
+.tabbar { margin-top: 0; }
+:root { --lock-bg: #2b2d31; }
+.lock { background: var(--lock-bg); }
+.lock-box { border-color: transparent; box-shadow: 0 12px 40px rgba(0, 0, 0, .35); }
