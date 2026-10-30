@@ -646,6 +646,9 @@
     if (dataReady) render();                       // 보이게 된 차트를 올바른 크기로 다시 그림
   }
   window.addEventListener("hashchange", () => { applyView(); window.scrollTo({ top: 0 }); });
+  // 새로 들어올 때는 항상 '전체 보기'로 시작 (새로고침할 때만 보던 탭 유지)
+  const nav = performance.getEntriesByType && performance.getEntriesByType("navigation")[0];
+  if (!(nav && nav.type === "reload") && location.hash) history.replaceState(null, "", location.pathname + location.search);
   applyView();
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", render);
   // 잠금이 풀린 뒤에만 데이터를 불러옴 (lock.js가 호출)
