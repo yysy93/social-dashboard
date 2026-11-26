@@ -503,10 +503,10 @@
   /* ⑥ 채널별 전체 업로드 현황 */
   const up = { q: "", fmt: "all", hot: false, sort: "date", dir: "desc", limit: 50, key: null };
   // 인기 기준 (config.js에 highlight: { likes: 5000, shares: 50 } 을 넣으면 그 값으로 바뀜)
-  const HL = { likes: CFG.highlight?.likes ?? 5000, shares: CFG.highlight?.shares ?? 50 };
-  const hotLikes = (p) => p.likes >= HL.likes;      // 좋아요 5,000 이상
-  const hotShares = (p) => p.shares > HL.shares;    // 공유 50 초과
-  const isHot = (p) => hotLikes(p) || hotShares(p);
+  const HL = { views: CFG.highlight?.views ?? 5000, shares: CFG.highlight?.shares ?? 50 };
+  const hotViews = (p) => p.views >= HL.views;      // 조회수 5,000 이상
+  const hotShares = (p) => p.shares >= HL.shares;   // 공유 50 이상
+  const isHot = (p) => hotViews(p) || hotShares(p);
   const UP_COLS = [
     ["date", "날짜", false], ["format", "포맷", false], ["title", "콘텐츠명", false],
     ["views", "조회수", true], ["reach", "도달", true], ["likes", "좋아요", true],
@@ -584,15 +584,15 @@
     $("#up-rows").innerHTML = shown.map((p) => {
       const newDay = up.sort === "date" && prev !== null && prev !== p.date; prev = p.date;
       const hot = isHot(p);
-      const why = [hotLikes(p) && `좋아요 ${fmt(HL.likes)} 이상`, hotShares(p) && `공유 ${fmt(HL.shares)} 초과`].filter(Boolean).join(" · ");
+      const why = [hotViews(p) && `조회수 ${fmt(HL.views)} 이상`, hotShares(p) && `공유 ${fmt(HL.shares)} 이상`].filter(Boolean).join(" · ");
       return `<tr class="${newDay ? "new-day" : ""} ${hot ? "hot" : ""}">
         <td>${p.date.slice(2).replace(/-/g, ".")}</td><td>${fmtBadge(p.format)}</td>
         <td class="t-title" ${hot ? `title="인기 콘텐츠: ${why}"` : ""}>${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.title)}</a>` : esc(p.title)}</td>
-        <td class="num">${dash(p.views)}</td><td class="num">${dash(p.reach)}</td><td class="num ${hotLikes(p) ? "hot-cell" : ""}">${dash(p.likes)}</td>
+        <td class="num ${hotViews(p) ? "hot-cell" : ""}">${dash(p.views)}</td><td class="num">${dash(p.reach)}</td><td class="num">${dash(p.likes)}</td>
         <td class="num">${dash(p.comments)}</td><td class="num">${dash(p.saves)}</td><td class="num ${hotShares(p) ? "hot-cell" : ""}">${dash(p.shares)}</td></tr>`;
     }).join("") || `<tr><td colspan="9" class="hint">조건에 맞는 콘텐츠가 없어요.</td></tr>`;
     $("#up-count").textContent = `· ${fmt(list.length)}건 중 ${fmt(shown.length)}건 표시 · 인기 ${fmt(hotTotal)}건`;
-    $("#hot-rule").textContent = `= 좋아요 ${fmt(HL.likes)} 이상 또는 공유 ${fmt(HL.shares)} 초과`;
+    $("#hot-rule").textContent = `= 조회수 ${fmt(HL.views)} 이상 또는 공유 ${fmt(HL.shares)} 이상`;
     $("#up-hot").checked = up.hot;
     const more = $("#up-more");
     more.hidden = list.length <= up.limit;
